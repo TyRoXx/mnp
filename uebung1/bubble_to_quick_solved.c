@@ -155,7 +155,7 @@ static void copy_int_array(int *dest, int const *source, size_t size)
 	memmove(dest, source, (size * sizeof(*dest)));
 }
 
-static int has_same_elements(int const *first, int *destructive_second, size_t size)
+static int reorder_int_array(int const *first, int *reordered, size_t size)
 {
 	size_t i;
 	
@@ -166,9 +166,9 @@ static int has_same_elements(int const *first, int *destructive_second, size_t s
 		size_t j;
 		for (j = i; j < size; ++j)
 		{
-			if (element == destructive_second[j])
+			if (element == reordered[j])
 			{
-				pos = (destructive_second + j);
+				pos = (reordered + j);
 				break;
 			}
 		}
@@ -177,7 +177,7 @@ static int has_same_elements(int const *first, int *destructive_second, size_t s
 			fprintf(stderr, "Element is missing\n");
 			return 0;
 		}
-		swap_int(destructive_second + i, pos);
+		swap_int(reordered + i, pos);
 	}
 	
 	return 1;
@@ -210,7 +210,7 @@ static int test_sort_functions(int const *data, size_t size)
 		
 		assert(is_sorted(working_copy, size));
 		
-		if (!has_same_elements(data, working_copy, size))
+		if (!reorder_int_array(data, working_copy, size))
 		{
 			free(working_copy);
 			return 0;
