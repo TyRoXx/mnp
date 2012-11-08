@@ -12,22 +12,8 @@ static void swap_int(int *first, int *second)
 	*second = temp;
 }
 
-static void bubble_sort_int(int *begin, int *end)
-{
-	int *i;
-	for (i = begin + 1; i < end; ++i)
-	{
-		int *j;
-		for (j = begin; j < (end - 1); ++j)
-		{
-			if (j[0] > j[1])
-			{
-				swap_int(j, j + 1);
-			}
-		}
-	}
-}
 
+/*Quicksort*/
 static int *min_int_value(int *first, int *second)
 {
 	return (*first < *second) ? first : second;
@@ -89,6 +75,50 @@ static void quick_sort_int(int *begin, int *end)
 	quick_sort_int(right, end);
 }
 
+
+/*Bubble Sort*/
+static void bubble_sort_int(int *begin, int *end)
+{
+	int *i;
+	for (i = begin + 1; i < end; ++i)
+	{
+		int *j;
+		for (j = begin; j < (end - 1); ++j)
+		{
+			if (j[0] > j[1])
+			{
+				swap_int(j, j + 1);
+			}
+		}
+	}
+}
+
+
+/* C style sort*/
+static int int_comparator(void const *left, void const *right)
+{
+	int const * const left_int = left;
+	int const * const right_int = right;
+	return (*left_int - *right_int);
+}
+
+static void c_lib_sort(int *begin, int *end)
+{
+	qsort(begin, (end - begin), sizeof(*begin), int_comparator);
+}
+
+
+/*list of tested sort functions*/
+typedef void (*int_sorter)(int *, int *);
+
+static int_sorter const sort_functions[] =
+{
+	bubble_sort_int,
+	quick_sort_int,
+	c_lib_sort,
+};
+
+
 static void generate_int(int *dest, size_t size, int (*generator)())
 {
 	size_t i;
@@ -98,11 +128,6 @@ static void generate_int(int *dest, size_t size, int (*generator)())
 	}
 }
 
-static int random_100(void)
-{
-	return rand() % 100;
-}
-
 static void for_each_int(int const *source, size_t size, void (*handler)(int))
 {
 	size_t i;
@@ -110,11 +135,6 @@ static void for_each_int(int const *source, size_t size, void (*handler)(int))
 	{
 		handler(source[i]);
 	}
-}
-
-static void print_int_line(int value)
-{
-	printf("%d\n", value);
 }
 
 static int is_sorted(int const *source, size_t size)
@@ -129,27 +149,6 @@ static int is_sorted(int const *source, size_t size)
 	}
 	return 1;
 }
-
-static int int_comparator(void const *left, void const *right)
-{
-	int const * const left_int = left;
-	int const * const right_int = right;
-	return (*left_int - *right_int);
-}
-
-static void c_lib_sort(int *begin, int *end)
-{
-	qsort(begin, (end - begin), sizeof(*begin), int_comparator);
-}
-
-typedef void (*int_sorter)(int *, int *);
-
-static int_sorter const sort_functions[] =
-{
-	bubble_sort_int,
-	quick_sort_int,
-	c_lib_sort,
-};
 
 static void copy_int_array(int *dest, int const *source, size_t size)
 {
@@ -182,6 +181,11 @@ static int has_same_elements(int const *first, int *destructive_second, size_t s
 	}
 	
 	return 1;
+}
+
+static void print_int_line(int value)
+{
+	printf("%d\n", value);
 }
 
 static int test_sort_functions(int const *data, size_t size)
@@ -217,6 +221,11 @@ static int test_sort_functions(int const *data, size_t size)
 	
 	free(working_copy);
 	return 1;
+}
+
+static int random_100(void)
+{
+	return rand() % 100;
 }
 
 int main(void)
