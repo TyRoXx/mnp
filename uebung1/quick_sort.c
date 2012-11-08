@@ -111,11 +111,18 @@ static void c_lib_sort(int *begin, int *end)
 /*list of tested sort functions*/
 typedef void (*int_sorter)(int *, int *);
 
-static int_sorter const sort_functions[] =
+typedef struct sort_entry_t
 {
-	bubble_sort_int,
-	quick_sort_int,
-	c_lib_sort,
+	int_sorter sort;
+	char const *name;
+}
+sort_entry_t;
+
+static sort_entry_t const sort_functions[] =
+{
+	{bubble_sort_int, "Bubble Sort"},
+	{quick_sort_int, "Quick Sort"},
+	{c_lib_sort, "C standard qsort"},
 };
 
 
@@ -203,12 +210,12 @@ static int test_sort_functions(int const *data, size_t size)
 	
 	for (i = 0; i < sort_function_count; ++i)
 	{
-		int_sorter const sort = sort_functions[i];
+		sort_entry_t const sort_entry = sort_functions[i];
 		copy_int_array(working_copy, data, size);
 		
-		sort(working_copy, working_copy + size);
+		sort_entry.sort(working_copy, working_copy + size);
 	
-		fprintf(stderr, "\n%u: Reihung nach der Sortierung:\n", (unsigned)i);
+		fprintf(stderr, "\n%u: Reihenfolge nach %s:\n", (unsigned)i, sort_entry.name);
 		for_each_int(working_copy, size, print_int_line);
 		
 		assert(is_sorted(working_copy, size));
