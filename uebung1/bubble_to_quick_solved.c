@@ -185,7 +185,7 @@ static int reorder_int_array(int const *model, int *reordered, size_t size)
 
 static void print_int_line(int value)
 {
-	printf("%d\n", value);
+	fprintf(stderr, "%d\n", value);
 }
 
 static int test_sort_functions(int const *data, size_t size)
@@ -208,7 +208,7 @@ static int test_sort_functions(int const *data, size_t size)
 		
 		sort(working_copy, working_copy + size);
 	
-		printf("\n%u: Reihung *nach* der Sortierung:\n", (unsigned)i);
+		fprintf(stderr, "\n%u: Reihung nach der Sortierung:\n", (unsigned)i);
 		for_each_int(working_copy, size, print_int_line);
 		
 		assert(is_sorted(working_copy, size));
@@ -247,7 +247,7 @@ int main(void)
 	srand(1337);
 	generate_int(numbers, numbers_size, random_100);
 
-	printf("Reihung *vor* der Sortierung:\n");
+	fprintf(stderr, "Reihung vor der Sortierung:\n");
 	for_each_int(numbers, numbers_size, print_int_line);
 
 	if (!test_sort_functions(numbers, numbers_size))
