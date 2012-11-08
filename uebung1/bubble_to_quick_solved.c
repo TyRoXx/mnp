@@ -155,13 +155,13 @@ static void copy_int_array(int *dest, int const *source, size_t size)
 	memmove(dest, source, (size * sizeof(*dest)));
 }
 
-static int reorder_int_array(int const *first, int *reordered, size_t size)
+static int reorder_int_array(int const *model, int *reordered, size_t size)
 {
 	size_t i;
 	
 	for (i = 0; i < size; ++i)
 	{
-		int const element = first[i];
+		int const element = model[i];
 		int *pos = 0;
 		size_t j;
 		for (j = i; j < size; ++j)
