@@ -190,12 +190,15 @@ static void print_int_line(int value)
 
 static int test_sort_functions(int const *data, size_t size)
 {
+	int success = 1;
+	
 	size_t const sort_function_count = (sizeof(sort_functions) / sizeof(sort_functions[0]));
 	size_t i;
 	int * const working_copy = malloc(sizeof(*working_copy) * size);
 	if (!working_copy)
 	{
-		return 0;
+		success = 0;
+		goto finish;
 	}
 	
 	for (i = 0; i < sort_function_count; ++i)
@@ -212,15 +215,16 @@ static int test_sort_functions(int const *data, size_t size)
 		
 		if (!reorder_int_array(data, working_copy, size))
 		{
-			free(working_copy);
-			return 0;
+			success = 0;
+			goto finish;
 		}
 		
 		assert(!memcmp(working_copy, data, (size * sizeof(*data))));
 	}
 	
+finish:
 	free(working_copy);
-	return 1;
+	return success;
 }
 
 static int random_100(void)
@@ -230,11 +234,14 @@ static int random_100(void)
 
 int main(void)
 {
+	int result = 0;
+	
 	size_t const numbers_size = 10;
 	int * const numbers = malloc(sizeof(*numbers) * numbers_size);
 	if (!numbers)
 	{
-		return 1;
+		result = 1;
+		goto finish;
 	}
 	
 	srand(1337);
@@ -245,10 +252,11 @@ int main(void)
 
 	if (!test_sort_functions(numbers, numbers_size))
 	{
-		free(numbers);
-		return 1;
+		result = 1;
+		goto finish;
 	}
 	
+finish:
 	free(numbers);
-	return 0;
+	return result;
 }
