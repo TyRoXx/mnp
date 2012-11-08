@@ -12,20 +12,81 @@ static void swap_int(int *first, int *second)
 	*second = temp;
 }
 
-static void bubble_sort_int(int *feld, size_t size)
+static void bubble_sort_int(int *begin, int *end)
 {
-	size_t outer;
-	for (outer = 1; outer < size; outer++)
+	int *i;
+	for (i = begin + 1; i < end; ++i)
 	{
-		size_t inner;
-		for (inner = 0; inner < size-1; inner++)
+		int *j;
+		for (j = begin; j < (end - 1); ++j)
 		{
-			if (feld[inner] > feld[inner+1])
+			if (j[0] > j[1])
 			{
-				swap_int(feld + inner, feld + inner + 1);
+				swap_int(j, j + 1);
 			}
 		}
 	}
+}
+
+static int *min_int_value(int *first, int *second)
+{
+	return (*first < *second) ? first : second;
+}
+
+static int *max_int_value(int *first, int *second)
+{
+	return (*first > *second) ? first : second;
+}
+
+static int *choose_pivot(int *begin, int *end)
+{
+	int * const first = begin;
+	int * const middle = begin + ((end - begin) / 2);
+	int * const last = end - 1;
+	int * const median =
+		max_int_value(
+			max_int_value(
+				min_int_value(first, middle),
+				min_int_value(first, last)
+				),
+			min_int_value(middle, last)
+			);
+	return median;
+}
+
+static void quick_sort_int(int *begin, int *end)
+{
+	int *pivot;
+	int *i;
+	int *right;
+	
+	if ((end - begin) <= 1)
+	{
+		return;
+	}
+	
+	pivot = choose_pivot(begin, end);
+	right = (end - 1);
+	swap_int(right, pivot);
+	pivot = right;
+	
+	for (i = begin; i < right; )
+	{
+		if (*i > *pivot)
+		{
+			--right;
+			swap_int(i, right);
+		}
+		else
+		{
+			++i;
+		}
+	}
+	
+	swap_int(pivot, right);
+	
+	quick_sort_int(begin, right);
+	quick_sort_int(right, end);
 }
 
 static void generate_int(int *dest, size_t size, int (*generator)())
@@ -69,11 +130,25 @@ static int is_sorted(int const *source, size_t size)
 	return 1;
 }
 
-typedef void (*int_sorter)(int *, size_t);
+static int int_comparator(void const *left, void const *right)
+{
+	int const * const left_int = left;
+	int const * const right_int = right;
+	return (*left_int - *right_int);
+}
+
+static void c_lib_sort(int *begin, int *end)
+{
+	qsort(begin, (end - begin), sizeof(*begin), int_comparator);
+}
+
+typedef void (*int_sorter)(int *, int *);
 
 static int_sorter const sort_functions[] =
 {
 	bubble_sort_int,
+	quick_sort_int,
+	c_lib_sort,
 };
 
 static void copy_int_array(int *dest, int const *source, size_t size)
@@ -124,11 +199,12 @@ static int test_sort_functions(int const *data, size_t size)
 		int_sorter const sort = sort_functions[i];
 		copy_int_array(working_copy, data, size);
 		
-		sort(working_copy, size);
-		assert(is_sorted(working_copy, size));
+		sort(working_copy, working_copy + size);
 	
-		printf("\nReihung *nach* der Sortierung:\n");
+		printf("\n%u: Reihung *nach* der Sortierung:\n", (unsigned)i);
 		for_each_int(working_copy, size, print_int_line);
+		
+		assert(is_sorted(working_copy, size));
 		
 		if (!has_same_elements(data, working_copy, size))
 		{
