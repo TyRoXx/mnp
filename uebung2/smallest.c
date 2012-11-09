@@ -45,7 +45,7 @@ static integer find_smallest_divisible(
 	
 /*	printf("is equivalent to %u..%u\n", min_divisor, max_divisor); */
 	
-	for (i = max_divisor; !is_evenly_divisible(i, min_divisor, max_divisor); i += max_divisor)
+	for (i = max_divisor; !is_evenly_divisible(i, min_divisor, max_divisor - 1); i += max_divisor)
 	{
 	}
 	
