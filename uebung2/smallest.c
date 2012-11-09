@@ -33,7 +33,7 @@ static integer find_smallest_divisible(
 	assert(max_divisor > 0);
 	assert(min_divisor <= max_divisor);
 	
-	printf("Divisor range %u..%u ", min_divisor, max_divisor);
+/*	printf("Divisor range %u..%u ", min_divisor, max_divisor); */
 	
 	min_divisor = (max_divisor / 2) + 1;
 	
@@ -43,7 +43,7 @@ static integer find_smallest_divisible(
 		min_divisor = 2;
 	}
 	
-	printf("is equivalent to %u..%u\n", min_divisor, max_divisor);
+/*	printf("is equivalent to %u..%u\n", min_divisor, max_divisor); */
 	
 	for (i = max_divisor; !is_evenly_divisible(i, min_divisor, max_divisor); i += max_divisor)
 	{
@@ -54,11 +54,16 @@ static integer find_smallest_divisible(
 
 int main(void)
 {
+	integer i;
+	
 	assert(find_smallest_divisible(1, 10) == 2520);
 	assert(find_smallest_divisible(1, 1) == 1);
 	assert(find_smallest_divisible(1, 2) == 2);
 	assert(find_smallest_divisible(1, 3) == 6);
 	
-	printf("Result 1..20: %u\n", find_smallest_divisible(1, 20));
+	for (i = 1; i <= 20; ++i)
+	{
+		printf("Result 1..%u: %u\n", i, find_smallest_divisible(1, i));
+	}
 	return 0;
 }
