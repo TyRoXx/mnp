@@ -24,7 +24,7 @@ static void bubble_sort(int *begin, int *end)
 		int *j;
 		for (j = begin; (j + 1) < end; ++j)
 		{
-			if (j[0] > j[1])
+			if (*j > *(j + 1))
 			{
 				swap(j, j + 1);
 			}
@@ -40,13 +40,19 @@ enum
 int main(void)
 {
 	int data[data_size];
-	size_t i;
-	for (i = 0; i < data_size; ++i)
 	{
-		data[i] = rand() % 100;
+		int *i = data, *end = (data + data_size);
+		for (; i != end; ++i)
+		{
+			*i = rand() % 100;
+		}
 	}
 	
+	print_ints(data, data + data_size);
+	puts("\n");
+
 	bubble_sort(data, data + data_size);
+
 	print_ints(data, data + data_size);
 	return 0;
 }
