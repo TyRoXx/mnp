@@ -7,24 +7,24 @@ struct trie
 };
 
 /* constructs a initial trie node */
-static void constructTrie(struct trie *t)
+static void construct_trie(struct trie *t)
 {
 }
 
 /* inserts all comma seperated words into the trie */
-static void insertWords(struct trie *t, char const * words)
+static void insert_words(struct trie *t, char const * words)
 {
 }
 
 /* searches a single word in the trie
    return 1 if the word is found, 0 otherwise
  */
-static int searchWord(struct trie const *t, char const *word)
+static int search_word(struct trie const *t, char const *word)
 {
 	return 0;
 }
 
-static char const * const inputString = 
+static char const * const input_string = 
 "takeoffs,rifling,subroutine,plead,deployments,seats,clothing,certificate,works,helmet,governors,states,"
 "tabulations,manifests,algorithm,explanations,son,progress,outline,chin,summary,junction,food,curvatures,"
 "privates,broadcast,fund,curtains,capes,digits,laundry,centers,gaskets,compliance,cameras,machinery,"
@@ -51,13 +51,13 @@ static char const * const inputString =
 "troubleshooters,term,cylinders,meals,paygrade,buy,silences,south,filler,stress,bunch,neutron,cheeses,"
 "hunte,hunde,hundehuette,hundehaus,huntehaus";
 
-static char const * const positivTest[] = {
+static char const * const positive_test[] = {
 "takeoffs","tabulations","privates","broadcast","surfaces","screwdriver",
 "quarterdecks","positions","warning","profit","superstructures","debts","thyristor","allegations",
 "profiles","conventions","object","array","nomenclatures","diameter","features","boats","equations",
 "base","permits","story","hunte","huntehaus",0};
 
-static char const * const negativTest[] = {
+static char const * const negative_test[] = {
 "takeoff","tabullations","private","broadcst","surface","screwriver",
 "quarterdeckss","position","warnings","proit","sperstructures","dets","thristor","alegations",
 "profile","convention","objects","arrayy","nomenclatres","diameer","fetures","bots","equtions",
@@ -68,22 +68,22 @@ int main(void)
 	struct trie t;
 	size_t i;
 
-	constructTrie(&t);
-	insertWords(&t, inputString);
+	construct_trie(&t);
+	insert_words(&t, input_string);
 
-	for (i = 0; positivTest[i]; ++i)
+	for (i = 0; positive_test[i]; ++i)
 	{
-		if (searchWord(&t, positivTest[i]) == 0)
+		if (search_word(&t, positive_test[i]) == 0)
 		{
-			printf("word \"%s\" was not found\n", positivTest[i]);
+			printf("word \"%s\" was not found\n", positive_test[i]);
 		}
 	}
 
-	for (i = 0; positivTest[i]; ++i)
+	for (i = 0; negative_test[i]; ++i)
 	{
-		if (searchWord(&t, negativTest[i]) == 1)
+		if (search_word(&t, negative_test[i]) == 1)
 		{
-			printf("word \"%s\" was incorrectly found\n", negativTest[i]);
+			printf("word \"%s\" was incorrectly found\n", negative_test[i]);
 		}
 	}
 	return 0;
