@@ -343,8 +343,6 @@ static void test_huge(void)
 
 	while (next_word(word, word_end))
 	{
-		printf("%s\n", word);
-
 		char const *word_iterator = word;
 		if (!insert_word(&t, &word_iterator))
 		{
