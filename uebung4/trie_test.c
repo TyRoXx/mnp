@@ -7,6 +7,7 @@ typedef struct trie_child_entry trie_child_entry;
 typedef struct trie
 {
 	trie_child_entry *entries, *entries_end;
+	int is_end;
 }
 trie;
 
@@ -20,6 +21,7 @@ struct trie_child_entry
 static void construct_trie(trie *t)
 {
 	t->entries = t->entries_end = 0;
+	t->is_end = 0;
 }
 
 static void destroy_trie(trie *t)
@@ -34,6 +36,21 @@ static void destroy_trie(trie *t)
 	free(t->entries);
 }
 
+static trie_child_entry *find_child_entry(trie const *t, char key)
+{
+	trie_child_entry *child;
+
+	for (child = t->entries; child != t->entries_end; ++child)
+	{
+		if (child->key == key)
+		{
+			return child;
+		}
+	}
+
+	return 0;
+}
+
 /* inserts all comma seperated words into the trie */
 static void insert_words(trie *t, char const * words)
 {
@@ -44,7 +61,25 @@ static void insert_words(trie *t, char const * words)
  */
 static int search_word(trie const *t, char const *word)
 {
-	return 0;
+	trie_child_entry *child;
+
+	if (*word == '\0')
+	{
+		return
+			(t->is_end) ||
+			(t->entries == t->entries_end);
+	}
+
+	child = find_child_entry(t, *word);
+
+	if (child)
+	{
+		return search_word(&child->child, word + 1);
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 static char const * const input_string = 
