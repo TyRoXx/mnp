@@ -1,29 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 typedef struct trie_child_entry trie_child_entry;
 
 typedef struct trie
 {
+	/*a sequence of child tries which are not sorted in
+	this implementation*/
 	trie_child_entry *entries, *entries_end;
+
+	/*is set to 1 if this (child) trie accepts the empty word*/
 	int is_end;
 }
 trie;
 
 struct trie_child_entry
 {
+	/*character accepted by this child connection*/
 	char key;
+
 	trie child;
 };
 
-/* constructs a initial trie node */
+/*constructs a valid non-ending trie with no children*/
 static void construct_trie(trie *t)
 {
 	t->entries = t->entries_end = 0;
 	t->is_end = 0;
 }
 
+/*frees the memory used by the trie and its children recursively*/
 static void destroy_trie(trie *t)
 {
 	trie_child_entry *child;
@@ -36,6 +42,9 @@ static void destroy_trie(trie *t)
 	free(t->entries);
 }
 
+/*Returns a child connection for the given character if existant.
+Otherwise, nullptr is returned.
+The worst-case complexity is linear for the number of children.*/
 static trie_child_entry *find_child_entry(trie const *t, char key)
 {
 	trie_child_entry *child;
@@ -51,6 +60,17 @@ static trie_child_entry *find_child_entry(trie const *t, char key)
 	return 0;
 }
 
+/*Modifies the trie to make it accept a given word.
+If the word is already in the trie, the function returns 1.
+The function returns 0 if a memory allocation fails. The trie
+is not changed in that case.
+The pointer pointed to by begin should point to the beginning
+of the word before the call. After a successful call the pointer
+points after the end of the word or after the comma after the
+word. The end of the word should be indicated by the caller with
+a zero-character or a comma.
+When the function returns 0 the *begin pointer has an unspecified
+value.*/
 static int insert_word(trie *t, char const **begin)
 {
 	if (**begin == '\0')
@@ -98,8 +118,10 @@ static int insert_word(trie *t, char const **begin)
 	}
 }
 
-/* inserts all comma seperated words into the trie */
-static int insert_words(trie *t, char const * words)
+/*Inserts all comma separated words into the trie.
+Returns 0 if a memory allocation fails. In that case any
+subset of the words may have been inserted into the tree.*/
+static int insert_words(trie *t, char const *words)
 {
 	while (*words != '\0')
 	{
@@ -112,18 +134,14 @@ static int insert_words(trie *t, char const * words)
 	return 1;
 }
 
-/* searches a single word in the trie
-   return 1 if the word is found, 0 otherwise
- */
+/*Returns whether the word is accepted by the trie.*/
 static int search_word(trie const *t, char const *word)
 {
 	trie_child_entry *child;
 
 	if (*word == '\0')
 	{
-		return
-			(t->is_end) ||
-			(t->entries == t->entries_end);
+		return t->is_end;
 	}
 
 	child = find_child_entry(t, *word);
@@ -138,6 +156,7 @@ static int search_word(trie const *t, char const *word)
 	}
 }
 
+/*Writes a given number of tab characters to the file.*/
 static void print_indentation(size_t indentation, FILE *out)
 {
 	while (indentation--)
@@ -146,6 +165,7 @@ static void print_indentation(size_t indentation, FILE *out)
 	}
 }
 
+/*Recursively prints the trie in a human-readable format to the file.*/
 static void print_trie(trie const *t, FILE *out, size_t indentation)
 {
 	trie_child_entry *child;
@@ -167,6 +187,9 @@ static void print_trie(trie const *t, FILE *out, size_t indentation)
 	}
 }
 
+/*Opens a file with the specified file name and prints the trie in
+a human-readable format into it. Returns whether the file could be
+successfully opened.*/
 static int print_trie_to_file(trie const *t, char const *file_name)
 {
 	FILE * const out = fopen(file_name, "w");
@@ -179,6 +202,9 @@ static int print_trie_to_file(trie const *t, char const *file_name)
 	return 1;
 }
 
+/*Construcs a trie from a comma-separated list of words and prints it
+to a specified file. Tests for expected and unexpected words and prints
+to stdout accordingly.*/
 static void test_trie(
 	char const *test_name,
 	char const *inserted,
