@@ -142,7 +142,7 @@ static void print_indentation(size_t indentation, FILE *out)
 {
 	while (indentation--)
 	{
-		fputs("    ", out);
+		fputs("\t", out);
 	}
 }
 
@@ -154,13 +154,6 @@ static void print_trie(trie const *t, FILE *out, size_t indentation)
 	{
 		fputs("[end]", out);
 	}
-
-	/*
-	if (t->entries == t->entries_end)
-	{
-		fputs("[no children]", out);
-	}
-	*/
 
 	fputs("\n", out);
 
@@ -186,7 +179,47 @@ static int print_trie_to_file(trie const *t, char const *file_name)
 	return 1;
 }
 
-static char const * const input_string = 
+static void test_trie(
+	char const *test_name,
+	char const *inserted,
+	char const * const *positive,
+	char const * const *negative)
+{
+	size_t i;
+	trie t;
+
+	printf("Test: %s\n", test_name);
+
+	construct_trie(&t);
+
+	if (!insert_words(&t, inserted))
+	{
+		printf("insert_words failed\n");
+		return;
+	}
+
+	print_trie_to_file(&t, test_name);
+
+	for (i = 0; positive[i]; ++i)
+	{
+		if (search_word(&t, positive[i]) == 0)
+		{
+			printf("word \"%s\" was not found\n", positive[i]);
+		}
+	}
+
+	for (i = 0; negative[i]; ++i)
+	{
+		if (search_word(&t, negative[i]) == 1)
+		{
+			printf("word \"%s\" was incorrectly found\n", negative[i]);
+		}
+	}
+
+	destroy_trie(&t);
+}
+
+static char const * const big_input = 
 "takeoffs,rifling,subroutine,plead,deployments,seats,clothing,certificate,works,helmet,governors,states,"
 "tabulations,manifests,algorithm,explanations,son,progress,outline,chin,summary,junction,food,curvatures,"
 "privates,broadcast,fund,curtains,capes,digits,laundry,centers,gaskets,compliance,cameras,machinery,"
@@ -213,115 +246,43 @@ static char const * const input_string =
 "troubleshooters,term,cylinders,meals,paygrade,buy,silences,south,filler,stress,bunch,neutron,cheeses,"
 "hunte,hunde,hundehuette,hundehaus,huntehaus";
 
-static char const * const positive_test[] = {
+static char const * const big_positive[] = {
 "takeoffs","tabulations","privates","broadcast","surfaces","screwdriver",
 "quarterdecks","positions","warning","profit","superstructures","debts","thyristor","allegations",
 "profiles","conventions","object","array","nomenclatures","diameter","features","boats","equations",
 "base","permits","story","hunte","huntehaus",0};
 
-static char const * const negative_test[] = {
+static char const * const big_negative[] = {
 "takeoff","tabullations","private","broadcst","surface","screwriver",
 "quarterdeckss","position","warnings","proit","sperstructures","dets","thristor","alegations",
 "profile","convention","objects","arrayy","nomenclatres","diameer","fetures","bots","equtions",
 "yoda","permit","storryy","hunt","hundehuet",0};
 
-static void test_empty_trie(void)
+static void test_big(void)
 {
-	size_t i;
-	trie t;
-
-	printf("test_empty_trie\n");
-
-	construct_trie(&t);
-
-	print_trie_to_file(&t, "empty_trie.txt");
-
-	for (i = 0; negative_test[i]; ++i)
-	{
-		if (search_word(&t, negative_test[i]) == 1)
-		{
-			printf("word \"%s\" was incorrectly found\n", negative_test[i]);
-		}
-	}
-
-	destroy_trie(&t);
+	test_trie("big_trie.txt", big_input, big_positive, big_negative);
 }
 
-static void test_one_element_trie(void)
+static char const * const empty_input = "";
+static char const * const empty_positive[] = {0};
+static char const * const * const empty_negative = big_positive;
+static void test_empty(void)
 {
-	size_t i;
-	trie t;
-	char const * const element = "abc";
-	char const *element_iterator = element;
-
-	printf("test_one_element_trie\n");
-
-	construct_trie(&t);
-
-	if (!insert_word(&t, &element_iterator))
-	{
-		printf("insert_word failed\n");
-		return;
-	}
-
-	print_trie_to_file(&t, "one_trie.txt");
-
-	if (!search_word(&t, element))
-	{
-		printf("word \"%s\" was not found\n", element);
-	}
-
-	for (i = 0; negative_test[i]; ++i)
-	{
-		if (search_word(&t, negative_test[i]) == 1)
-		{
-			printf("word \"%s\" was incorrectly found\n", negative_test[i]);
-		}
-	}
-
-	destroy_trie(&t);
+	test_trie("empty_trie.txt", empty_input, empty_positive, empty_negative);
 }
 
-static void test_big_trie(void)
+static char const * const small_input = "abc,abcd,ab,aa";
+static char const * const small_positive[] = {"abc", "abcd", "ab", "aa", 0};
+static char const * const small_negative[] = {"", "a", 0};
+static void test_small(void)
 {
-	size_t i;
-	trie t;
-
-	printf("test_big_trie\n");
-
-	construct_trie(&t);
-
-	if (!insert_words(&t, input_string))
-	{
-		printf("insert_words failed\n");
-		return;
-	}
-
-	print_trie_to_file(&t, "big_tree.txt");
-
-	for (i = 0; positive_test[i]; ++i)
-	{
-		if (search_word(&t, positive_test[i]) == 0)
-		{
-			printf("word \"%s\" was not found\n", positive_test[i]);
-		}
-	}
-
-	for (i = 0; negative_test[i]; ++i)
-	{
-		if (search_word(&t, negative_test[i]) == 1)
-		{
-			printf("word \"%s\" was incorrectly found\n", negative_test[i]);
-		}
-	}
-
-	destroy_trie(&t);
+	test_trie("small_trie.txt", small_input, small_positive, small_negative);
 }
 
 int main(void)
 {
-	test_empty_trie();
-	test_one_element_trie();
-	test_big_trie();
+	test_empty();
+	test_small();
+	test_big();
 	return 0;
 }
