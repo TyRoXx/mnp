@@ -93,7 +93,7 @@ static int insert_word(trie *t, char const **begin)
 			construct_trie(&new_entry->child);
 
 			++(*begin);
-			return 1;
+			return insert_word(&new_entry->child, begin);
 		}
 	}
 }
@@ -138,6 +138,54 @@ static int search_word(trie const *t, char const *word)
 	}
 }
 
+static void print_indentation(size_t indentation, FILE *out)
+{
+	while (indentation--)
+	{
+		fputs("    ", out);
+	}
+}
+
+static void print_trie(trie const *t, FILE *out, size_t indentation)
+{
+	trie_child_entry *child;
+
+	if (t->is_end)
+	{
+		fputs("[end]", out);
+	}
+
+	/*
+	if (t->entries == t->entries_end)
+	{
+		fputs("[no children]", out);
+	}
+	*/
+
+	fputs("\n", out);
+
+	++indentation;
+
+	for (child = t->entries; child != t->entries_end; ++child)
+	{
+		print_indentation(indentation, out);
+		fprintf(out, "%c ", child->key);
+		print_trie(&child->child, out, indentation);
+	}
+}
+
+static int print_trie_to_file(trie const *t, char const *file_name)
+{
+	FILE * const out = fopen(file_name, "w");
+	if (!out)
+	{
+		return 0;
+	}
+	print_trie(t, out, 0);
+	fclose(out);
+	return 1;
+}
+
 static char const * const input_string = 
 "takeoffs,rifling,subroutine,plead,deployments,seats,clothing,certificate,works,helmet,governors,states,"
 "tabulations,manifests,algorithm,explanations,son,progress,outline,chin,summary,junction,food,curvatures,"
@@ -177,17 +225,79 @@ static char const * const negative_test[] = {
 "profile","convention","objects","arrayy","nomenclatres","diameer","fetures","bots","equtions",
 "yoda","permit","storryy","hunt","hundehuet",0};
 
-int main(void)
+static void test_empty_trie(void)
 {
-	trie t;
 	size_t i;
+	trie t;
+
+	printf("test_empty_trie\n");
 
 	construct_trie(&t);
+
+	print_trie_to_file(&t, "empty_trie.txt");
+
+	for (i = 0; negative_test[i]; ++i)
+	{
+		if (search_word(&t, negative_test[i]) == 1)
+		{
+			printf("word \"%s\" was incorrectly found\n", negative_test[i]);
+		}
+	}
+
+	destroy_trie(&t);
+}
+
+static void test_one_element_trie(void)
+{
+	size_t i;
+	trie t;
+	char const * const element = "abc";
+	char const *element_iterator = element;
+
+	printf("test_one_element_trie\n");
+
+	construct_trie(&t);
+
+	if (!insert_word(&t, &element_iterator))
+	{
+		printf("insert_word failed\n");
+		return;
+	}
+
+	print_trie_to_file(&t, "one_trie.txt");
+
+	if (!search_word(&t, element))
+	{
+		printf("word \"%s\" was not found\n", element);
+	}
+
+	for (i = 0; negative_test[i]; ++i)
+	{
+		if (search_word(&t, negative_test[i]) == 1)
+		{
+			printf("word \"%s\" was incorrectly found\n", negative_test[i]);
+		}
+	}
+
+	destroy_trie(&t);
+}
+
+static void test_big_trie(void)
+{
+	size_t i;
+	trie t;
+
+	printf("test_big_trie\n");
+
+	construct_trie(&t);
+
 	if (!insert_words(&t, input_string))
 	{
 		printf("insert_words failed\n");
-		return 1;
+		return;
 	}
+
+	print_trie_to_file(&t, "big_tree.txt");
 
 	for (i = 0; positive_test[i]; ++i)
 	{
@@ -206,5 +316,12 @@ int main(void)
 	}
 
 	destroy_trie(&t);
+}
+
+int main(void)
+{
+	test_empty_trie();
+	test_one_element_trie();
+	test_big_trie();
 	return 0;
 }
