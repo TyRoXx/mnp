@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct trie_child_entry trie_child_entry;
 
@@ -245,7 +246,7 @@ static void test_trie(
 	destroy_trie(&t);
 }
 
-static char const * const big_input = 
+static char const * const big_input =
 "takeoffs,rifling,subroutine,plead,deployments,seats,clothing,certificate,works,helmet,governors,states,"
 "tabulations,manifests,algorithm,explanations,son,progress,outline,chin,summary,junction,food,curvatures,"
 "privates,broadcast,fund,curtains,capes,digits,laundry,centers,gaskets,compliance,cameras,machinery,"
@@ -305,10 +306,74 @@ static void test_small(void)
 	test_trie("small_trie.txt", small_input, small_positive, small_negative);
 }
 
+static void get_initial_word(char *begin, char *end)
+{
+	memset(begin, 'a', (end - begin));
+	end[0] = '\0';
+}
+
+static int next_word(char *begin, char *end)
+{
+	char *i = (end - 1);
+
+	while (i >= begin)
+	{
+		*i = 'a' + (*i - 'a' + 1) % 26;
+		if (*i == 'a')
+		{
+			--i;
+			continue;
+		}
+
+		return 1;
+	}
+
+	return 0;
+}
+
+static void test_huge(void)
+{
+	trie t;
+	char word[3 + 1];
+	char * const word_end = word + sizeof(word) - 1;
+
+	construct_trie(&t);
+
+	get_initial_word(word, word_end);
+
+	while (next_word(word, word_end))
+	{
+		printf("%s\n", word);
+
+		char const *word_iterator = word;
+		if (!insert_word(&t, &word_iterator))
+		{
+			printf("insert_word failed\n");
+			return;
+		}
+	}
+
+	print_trie_to_file(&t, "huge_trie.txt");
+
+	get_initial_word(word, word_end);
+
+	while (next_word(word, word_end))
+	{
+		if (!search_word(&t, word))
+		{
+			printf("search_word failed\n");
+			return;
+		}
+	}
+
+	destroy_trie(&t);
+}
+
 int main(void)
 {
 	test_empty();
 	test_small();
 	test_big();
+	test_huge();
 	return 0;
 }
