@@ -51,9 +51,65 @@ static trie_child_entry *find_child_entry(trie const *t, char key)
 	return 0;
 }
 
-/* inserts all comma seperated words into the trie */
-static void insert_words(trie *t, char const * words)
+static int insert_word(trie *t, char const **begin)
 {
+	if (**begin == '\0')
+	{
+		t->is_end = 1;
+		return 1;
+	}
+	else if (**begin == ',')
+	{
+		++(*begin);
+		t->is_end = 1;
+		return 1;
+	}
+	else
+	{
+		trie_child_entry * const child = find_child_entry(t, **begin);
+		if (child)
+		{
+			++(*begin);
+			return insert_word(&child->child, begin);
+		}
+		else
+		{
+			size_t const new_entry_count = (t->entries_end - t->entries) + 1;
+			trie_child_entry * const new_entries =
+				realloc(t->entries, sizeof(*new_entries) * new_entry_count);
+
+			trie_child_entry *new_entry;
+
+			if (!new_entries)
+			{
+				return 0;
+			}
+
+			t->entries = new_entries;
+			t->entries_end = new_entries + new_entry_count;
+
+			new_entry = t->entries_end - 1;
+			new_entry->key = **begin;
+			construct_trie(&new_entry->child);
+
+			++(*begin);
+			return 1;
+		}
+	}
+}
+
+/* inserts all comma seperated words into the trie */
+static int insert_words(trie *t, char const * words)
+{
+	while (*words != '\0')
+	{
+		if (!insert_word(t, &words))
+		{
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 /* searches a single word in the trie
@@ -127,7 +183,11 @@ int main(void)
 	size_t i;
 
 	construct_trie(&t);
-	insert_words(&t, input_string);
+	if (!insert_words(&t, input_string))
+	{
+		printf("insert_words failed\n");
+		return 1;
+	}
 
 	for (i = 0; positive_test[i]; ++i)
 	{
