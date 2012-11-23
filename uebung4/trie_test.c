@@ -1,25 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct trie
+
+typedef struct trie_child_entry trie_child_entry;
+
+typedef struct trie
 {
-	int d;
+	trie_child_entry *entries, *entries_end;
+}
+trie;
+
+struct trie_child_entry
+{
+	char key;
+	trie child;
 };
 
 /* constructs a initial trie node */
-static void construct_trie(struct trie *t)
+static void construct_trie(trie *t)
 {
+	t->entries = t->entries_end = 0;
+}
+
+static void destroy_trie(trie *t)
+{
+	trie_child_entry *child;
+
+	for (child = t->entries; child != t->entries_end; ++child)
+	{
+		destroy_trie(&child->child);
+	}
+
+	free(t->entries);
 }
 
 /* inserts all comma seperated words into the trie */
-static void insert_words(struct trie *t, char const * words)
+static void insert_words(trie *t, char const * words)
 {
 }
 
 /* searches a single word in the trie
    return 1 if the word is found, 0 otherwise
  */
-static int search_word(struct trie const *t, char const *word)
+static int search_word(trie const *t, char const *word)
 {
 	return 0;
 }
@@ -65,7 +88,7 @@ static char const * const negative_test[] = {
 
 int main(void)
 {
-	struct trie t;
+	trie t;
 	size_t i;
 
 	construct_trie(&t);
@@ -86,5 +109,7 @@ int main(void)
 			printf("word \"%s\" was incorrectly found\n", negative_test[i]);
 		}
 	}
+
+	destroy_trie(&t);
 	return 0;
 }
