@@ -43,7 +43,7 @@ static void destroy_trie(trie *t)
 	free(t->entries);
 }
 
-/*Returns a child connection for the given character if existant.
+/*Returns a child connection for the given character if existent.
 Otherwise, nullptr is returned.
 The worst-case complexity is linear for the number of children.*/
 static trie_child_entry *find_child_entry(trie const *t, char key)
