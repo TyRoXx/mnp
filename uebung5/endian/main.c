@@ -81,8 +81,26 @@ static int create_endianness_comparison_file(
 	return 1;
 }
 
+static void test_conv_endian_16(FILE *error_out)
+{
+	uint32 i;
+	for (i = 0; i < (1 << 16); ++i)
+	{
+		uint16 const original = (uint16)i;
+		uint16 const converted = conv_endian_16(original);
+		uint16 const back = conv_endian_16(converted);
+		if (original != back)
+		{
+			fprintf(error_out, "Endian conversion failed for %u\n",
+					(unsigned)i);
+		}
+	}
+}
+
 int main(void)
 {
+	test_conv_endian_16(stderr);
+
 	if (!create_endianness_comparison_file("endian-compare.txt"))
 	{
 		return 1;
