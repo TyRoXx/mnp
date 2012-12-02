@@ -21,13 +21,28 @@ static uint16 conv_endian_16(uint16 value)
 			((value & 0xff00) >> 8);
 }
 
-static uint32 conv_endian_32(uint32 value)
-{
-	return ((value & 0x000000ff) << 24) |
-			((value & 0x0000ff00) << 8) |
-			((value & 0x00ff0000) >> 8) |
-			((value & 0xff000000) >> 24);
+#define DEFINE_CONV_ENDIAN_FUNC(type__, name__) \
+type__ name__(type__ value) \
+{ \
+	type__ result = 0; \
+	size_t i; \
+	for (i = 0; i < (sizeof(value) / 2); ++i) \
+	{ \
+		size_t const first_shift = (8 * i); \
+		size_t const second_shift = (8 * (sizeof(value) - i - 1)); \
+		unsigned char const first = \
+				(unsigned char)(value >> first_shift); \
+		unsigned char const second = \
+				(unsigned char)(value >> second_shift); \
+		result |= (type__)(first << second_shift); \
+		result |= (type__)(second << first_shift); \
+	} \
+	return result; \
 }
+
+static DEFINE_CONV_ENDIAN_FUNC(unsigned short, conv_endian_short)
+static DEFINE_CONV_ENDIAN_FUNC(unsigned int, conv_endian_int)
+static DEFINE_CONV_ENDIAN_FUNC(unsigned long, conv_endian_long)
 
 static void print_binary_8(
 		FILE *dest,
@@ -74,6 +89,8 @@ static int create_endianness_comparison_file(
 	FILE * const file = fopen(path, "w");
 	if (!file)
 	{
+		fprintf(stderr, "Could not open file %s\n",
+				path);
 		return 0;
 	}
 	print_binary_range_16_both(file, 1, 32);
@@ -81,31 +98,46 @@ static int create_endianness_comparison_file(
 	return 1;
 }
 
-static void test_conv_endian_16(FILE *error_out)
-{
-	uint32 i;
-	for (i = 0; i < (1 << 16); ++i)
-	{
-		uint16 const original = (uint16)i;
-		uint16 const converted = conv_endian_16(original);
-		uint16 const back = conv_endian_16(converted);
-		if (original != back)
-		{
-			fprintf(error_out, "Endian conversion failed for %u\n",
-					(unsigned)i);
-		}
-	}
+#define DEFINE_TEST_CONV_ENDIAN_FUNC(type__, name__, conv__) \
+int name__(FILE *error_out) \
+{ \
+	int success = 1; \
+	size_t const max = (type__)0xffff; \
+	size_t i; \
+	for (i = 0; i <= max; ++i) \
+	{ \
+		type__ const original = (type__)i; \
+		type__ const converted = conv__(original); \
+		type__ const back = conv__(converted); \
+		if (original != back) \
+		{ \
+			fprintf(error_out, "%s: Endian conversion failed for %u\n", \
+					#name__, (unsigned)i); \
+			success = 0; \
+		} \
+	} \
+	return success; \
 }
+
+static DEFINE_TEST_CONV_ENDIAN_FUNC(uint16, test_conv_endian_16, conv_endian_16)
+static DEFINE_TEST_CONV_ENDIAN_FUNC(unsigned short, test_conv_endian_short, conv_endian_short)
+static DEFINE_TEST_CONV_ENDIAN_FUNC(unsigned int, test_conv_endian_int, conv_endian_int)
+static DEFINE_TEST_CONV_ENDIAN_FUNC(unsigned long, test_conv_endian_long, conv_endian_long)
 
 int main(void)
 {
-	test_conv_endian_16(stderr);
-
-	if (!create_endianness_comparison_file("endian-compare.txt"))
+	if (test_conv_endian_16(stderr) &
+		test_conv_endian_short(stderr) &
+		test_conv_endian_int(stderr) &
+		test_conv_endian_long(stderr) &
+		create_endianness_comparison_file("endian-compare.txt"))
+	{
+		fprintf(stderr, "All tests passed\n");
+		return 0;
+	}
+	else
 	{
 		return 1;
 	}
-	(void)conv_endian_32;
-	return 0;
 }
 
