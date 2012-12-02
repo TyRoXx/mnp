@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <limits.h>
+#include <assert.h>
 
 typedef unsigned short uint16;
 typedef unsigned int uint32;
@@ -13,12 +14,6 @@ void check_integer_types(void)
 	(void)check_uint16;
 	(void)check_uint32;
 	(void)check_char_bit;
-}
-
-static uint16 conv_endian_16(uint16 value)
-{
-	return ((value & 0x00ff) << 8) |
-			((value & 0xff00) >> 8);
 }
 
 #define DEFINE_CONV_ENDIAN_FUNC(type__, name__) \
@@ -40,6 +35,8 @@ type__ name__(type__ value) \
 	return result; \
 }
 
+static DEFINE_CONV_ENDIAN_FUNC(uint16, conv_endian_16)
+static DEFINE_CONV_ENDIAN_FUNC(uint32, conv_endian_32)
 static DEFINE_CONV_ENDIAN_FUNC(unsigned short, conv_endian_short)
 static DEFINE_CONV_ENDIAN_FUNC(unsigned int, conv_endian_int)
 static DEFINE_CONV_ENDIAN_FUNC(unsigned long, conv_endian_long)
@@ -126,6 +123,15 @@ static DEFINE_TEST_CONV_ENDIAN_FUNC(unsigned long, test_conv_endian_long, conv_e
 
 int main(void)
 {
+	assert(conv_endian_32(0x0000aabb) == 0xbbaa0000);
+	assert(conv_endian_32(0x00aabbcc) == 0xccbbaa00);
+	assert(conv_endian_32(0xaabbccdd) == 0xddccbbaa);
+	assert(conv_endian_32(0xffffffff) == 0xffffffff);
+	assert(conv_endian_32(0) == 0);
+	assert(conv_endian_16(0xaabb) == 0xbbaa);
+	assert(conv_endian_16(0xffff) == 0xffff);
+	assert(conv_endian_16(0) == 0);
+
 	if (test_conv_endian_16(stderr) &
 		test_conv_endian_short(stderr) &
 		test_conv_endian_int(stderr) &
