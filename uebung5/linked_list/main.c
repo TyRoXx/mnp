@@ -53,31 +53,86 @@ static int getValue(Node *current)
 	return current->element;
 }
 
+typedef struct LinkedList
+{
+	Node *first, *last;
+}
+LinkedList;
+
+static void createLinkedList(LinkedList *list)
+{
+	list->first = list->last = 0;
+}
+
+static void destroyLinkedList(LinkedList *list)
+{
+	Node *current = list->first;
+	while (current)
+	{
+		Node * const next = current->next;
+		free(current);
+		current = next;
+	}
+}
+
+static int pushBack(LinkedList *list, int value)
+{
+	Node * const node = createNode(value);
+	if (node)
+	{
+		if (list->last)
+		{
+			list->last->next = node;
+		}
+		else
+		{
+			list->first = node;
+		}
+		list->last = node;
+		return 1;
+	}
+	return 0;
+}
+
+int const ListSize = 32;
+
 int main(void)
 {
-	Node * const root = createNode(0);
+	int result;
+	LinkedList list;
 	Node *current;
 	int i;
 
-	for (i = 1; i < 32; ++i)
+	(void)appendAtTheEnd; /*pushBack is better*/
+
+	createLinkedList(&list);
+
+	for (i = 0; i < ListSize; ++i)
 	{
-		appendAtTheEnd(root, createNode(i));
+		if (!pushBack(&list, i))
+		{
+			printf("No memory\n");
+			result = 1;
+			goto leave;
+		}
 	}
 
 	i = 0;
-	current = root;
+	current = list.first;
 	for (;;)
 	{
 		if (!current)
 		{
 			printf("cannot check because current is NULL\n");
-			return 1;
+			result = 1;
+			goto leave;
 		}
 
 		if (getValue(current) != i)
 		{
 			printf("Expected %i\n", i);
-			return 1;
+			result = 1;
+			goto leave;
 		}
 
 		++i;
@@ -91,13 +146,18 @@ int main(void)
 		}
 	}
 
-	if (i != 32)
+	if (i != ListSize)
 	{
 		printf("Unexpected number of elements\n");
-		return 1;
+		result = 1;
+		goto leave;
 	}
 
 	printf("Test passed\n");
-	return 0;
+	result = 0;
+
+leave:
+	destroyLinkedList(&list);
+	return result;
 }
 
