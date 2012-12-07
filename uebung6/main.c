@@ -18,12 +18,10 @@ static uint sum_of_dividers(uint dividend)
 	return sum;
 }
 
-static int has_friend_in_range(uint candidate, uint min, uint max)
+static int has_friend(uint candidate)
 {
 	uint const candidate_sum = sum_of_dividers(candidate);
-	return (candidate_sum >= min) &&
-			(candidate_sum <= max) &&
-			(candidate_sum != candidate) &&
+	return (candidate_sum != candidate) &&
 			(candidate == sum_of_dividers(candidate_sum));
 }
 
@@ -33,7 +31,7 @@ static uint sum_of_friends(uint min, uint max)
 	uint i;
 	for (i = min; i <= max; ++i)
 	{
-		if (has_friend_in_range(i, min, max))
+		if (has_friend(i))
 		{
 			sum += i;
 		}
@@ -51,11 +49,18 @@ int main(void)
 {
 	assert(test_friends(220, 284));
 	assert(test_friends(1184, 1210));
-	assert(test_friends(18416, 17296));
-	assert(has_friend_in_range(220, 284, 284));
-	assert(has_friend_in_range(284, 220, 220));
-	assert(!has_friend_in_range(220, 284 + 1, 284 + 1));
-	assert(!has_friend_in_range(284, 220 + 1, 220 + 1));
+	assert(test_friends(17296, 18416));
+	assert(has_friend(220));
+	assert(has_friend(284));
+	assert(has_friend(1184));
+	assert(has_friend(1210));
+	assert(has_friend(17296));
+	assert(has_friend(18416));
+	assert(!has_friend(0));
+	assert(!has_friend(1));
+	assert(!has_friend(2));
+	assert(!has_friend(220 + 1));
+	assert(!has_friend(284 + 1));
 
 	printf("%u\n", sum_of_friends(0, 10000));
 	return 0;
