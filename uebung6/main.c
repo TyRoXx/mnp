@@ -41,10 +41,17 @@ static uint sum_of_friends(uint min, uint max)
 	return sum;
 }
 
+static int test_friends(uint first, uint second)
+{
+	return sum_of_dividers(first) == second &&
+			sum_of_dividers(second) == first;
+}
+
 int main(void)
 {
-	assert(sum_of_dividers(220) == 284);
-	assert(sum_of_dividers(284) == 220);
+	assert(test_friends(220, 284));
+	assert(test_friends(1184, 1210));
+	assert(test_friends(18416, 17296));
 	assert(has_friend_in_range(220, 284, 284));
 	assert(has_friend_in_range(284, 220, 220));
 	assert(!has_friend_in_range(220, 284 + 1, 284 + 1));
