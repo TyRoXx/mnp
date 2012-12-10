@@ -16,10 +16,10 @@ void check_integer_types(void)
 	(void)check_char_bit;
 }
 
-#define DEFINE_CONV_ENDIAN_FUNC(type__, name__) \
-type__ name__(type__ value) \
+#define DEFINE_CONV_ENDIAN_FUNC(type_, name_) \
+type_ name_(type_ value) \
 { \
-	type__ result = 0; \
+	type_ result = 0; \
 	size_t i; \
 	for (i = 0; i < (sizeof(value) / 2); ++i) \
 	{ \
@@ -29,8 +29,8 @@ type__ name__(type__ value) \
 				(unsigned char)(value >> first_shift); \
 		unsigned char const second = \
 				(unsigned char)(value >> second_shift); \
-		result |= (type__)(first << second_shift); \
-		result |= (type__)(second << first_shift); \
+		result |= (type_)(first << second_shift); \
+		result |= (type_)(second << first_shift); \
 	} \
 	return result; \
 }
@@ -95,21 +95,21 @@ static int create_endianness_comparison_file(
 	return 1;
 }
 
-#define DEFINE_TEST_CONV_ENDIAN_FUNC(type__, name__, conv__) \
-int name__(FILE *error_out) \
+#define DEFINE_TEST_CONV_ENDIAN_FUNC(type_, name_, conv_) \
+int name_(FILE *error_out) \
 { \
 	int success = 1; \
-	size_t const max = (type__)0xffff; \
+	size_t const max = (type_)0xffff; \
 	size_t i; \
 	for (i = 0; i <= max; ++i) \
 	{ \
-		type__ const original = (type__)i; \
-		type__ const converted = conv__(original); \
-		type__ const back = conv__(converted); \
+		type_ const original = (type_)i; \
+		type_ const converted = conv_(original); \
+		type_ const back = conv_(converted); \
 		if (original != back) \
 		{ \
 			fprintf(error_out, "%s: Endian conversion failed for %u\n", \
-					#name__, (unsigned)i); \
+					#name_, (unsigned)i); \
 			success = 0; \
 		} \
 	} \
