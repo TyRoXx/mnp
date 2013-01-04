@@ -1,0 +1,26 @@
+12		mov eax, 1
+(gdb) info registers
+rax            0xfffffffe	4294967294
+rbx            0x7	7
+rcx            0x0	0
+rdx            0x0	0
+rsi            0x0	0
+rdi            0x0	0
+rbp            0x0	0x0
+rsp            0x7fffffffe1b0	0x7fffffffe1b0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x200	512
+r12            0x0	0
+r13            0x0	0
+r14            0x0	0
+r15            0x0	0
+rip            0x40008d	0x40008d <end>
+eflags         0x293	[ CF AF SF IF ]
+cs             0x33	51
+ss             0x2b	43
+ds             0x0	0
+es             0x0	0
+fs             0x0	0
+gs             0x0	0
