@@ -23,10 +23,10 @@ _start: nop                     ; int main(void) {
 	                            ; d wird mit der oberen Hälfte von eax überschrieben
 
 end:
-	mov rax, 1
-	mov rbx, 0
+	mov eax, 1
+	mov ebx, 0
 	int 80h                     ;     exit(0);
 
-	mov rax, 1
+	mov eax, 1
 	ret                         ;     return 1;
 	                            ; }
