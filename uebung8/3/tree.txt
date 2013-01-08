@@ -1,0 +1,8 @@
+
+c - (a * b) + (d / ((e % f) - g) / h)
+
+LR
+c push a b * pop - d push e f % g - pop / h /
+
+RL
+h push g push f e % pop - d / pop / push b a * c - pop +
